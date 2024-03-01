@@ -8,26 +8,36 @@ import { Repository } from 'typeorm';
 @Injectable()
 export class RoomCategoryService {
   @InjectRepository(RoomCategory)
-  private roomRepository: Repository<RoomCategory>;
+  private roomCategoryRepository: Repository<RoomCategory>;
 
-  create(createRoomCategoryDto: CreateRoomCategoryDto) {
-    return 'This action adds a new roomCategory';
+  async create(createRoomDto) {
+    const res = await this.roomCategoryRepository.save(createRoomDto);
+    return res;
   }
 
-  findAll() {
-    return this.roomRepository.find();
-
+  async findAll() {
+    return this.roomCategoryRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} roomCategory`;
+  async findOne(id: number) {
+    const res = await this.roomCategoryRepository.findOneBy({ id });
+
+    return res;
   }
 
-  update(id: number, updateRoomCategoryDto: UpdateRoomCategoryDto) {
-    return `This action updates a #${id} roomCategory`;
+  async search(params) {
+    const res = await this.roomCategoryRepository.find(params);
+    return res;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} roomCategory`;
+  async update(id: number, updateRoomCategoryDto) {
+    const res = await this.roomCategoryRepository.update(id, updateRoomCategoryDto);
+
+    return res;
+  }
+
+  async remove(id: number) {
+    const res = await this.roomCategoryRepository.update(id,{state:false})
+    return res
   }
 }

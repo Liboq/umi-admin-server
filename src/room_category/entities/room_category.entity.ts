@@ -19,4 +19,10 @@ export class RoomCategory {
     length: 50,
   })
   description: string;
+
+  @Column({
+    comment: '是否可用',
+    default: true,
+  })
+  state: boolean;
 }

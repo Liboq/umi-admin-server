@@ -1,10 +1,6 @@
-import { RoomCategory } from 'src/room_category/entities/room_category.entity';
-import {
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  ManyToOne,
-} from 'typeorm';
+import { Reservation } from '../../reservation/entities/reservation.entity';
+
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity({
   name: 'room',
@@ -19,8 +15,10 @@ export class Room {
   })
   name: string;
 
+  //0:空闲 1：已预订 2：已入住 3：退房
   @Column({
     comment: '状态',
+    default: 0,
   })
   status: number;
 
@@ -39,4 +37,13 @@ export class Room {
     length: 50,
   })
   description: string;
+
+  @OneToMany(() => Reservation, (reservation) => reservation.room)
+  reservations: Reservation[];
+  
+  @Column({
+    comment: '是否存在',
+    default: true,
+  })
+  state: boolean;
 }

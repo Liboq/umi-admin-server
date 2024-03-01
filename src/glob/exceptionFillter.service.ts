@@ -1,30 +1,36 @@
 import {
-    ArgumentsHost,
-    Catch,
-    ExceptionFilter,
-    HttpException,
-  } from '@nestjs/common';
-  
-  @Catch()
-  export class HttpExceptionFilter implements ExceptionFilter {
-    catch(exception: HttpException, host: ArgumentsHost) {
-      const ctx = host.switchToHttp();
-      const response = ctx.getResponse();
-      const request = ctx.getRequest();
-  
-      const status = exception.getStatus();
-      const exceptionRes: any = exception.getResponse();
-      const { error, message } = exceptionRes;
-  
-      const msgLog = {
-        status,
-        message,
-        error,
-        path: request.url,
-        timestamp: new Date().toLocaleString(),
-      };
-  
-      response.status(status).json(msgLog);
-    }
+  ExceptionFilter,
+  Catch,
+  ArgumentsHost,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
+import { HttpAdapterHost } from '@nestjs/core';
+
+@Catch()
+export class HttpExceptionFilter implements ExceptionFilter {
+  constructor(private readonly httpAdapterHost: HttpAdapterHost) {}
+
+  catch(exception: unknown, host: ArgumentsHost): void {
+    // In certain situations `httpAdapter` might not be available in the
+    // constructor method, thus we should resolve it here.
+    const { httpAdapter } = this.httpAdapterHost;
+
+    const ctx = host.switchToHttp();
+    console.log(exception);
+
+    const httpStatus =
+      exception instanceof HttpException
+        ? exception.getStatus()
+        : HttpStatus.INTERNAL_SERVER_ERROR;
+    const message = exception instanceof HttpException ? exception.message : '';
+    const responseBody = {
+      message,
+      statusCode: httpStatus,
+      timestamp: new Date().toISOString(),
+      path: httpAdapter.getRequestUrl(ctx.getRequest()),
+    };
+
+    httpAdapter.reply(ctx.getResponse(), responseBody, httpStatus);
   }
-  
+}

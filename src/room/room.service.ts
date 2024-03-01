@@ -3,37 +3,48 @@ import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
 import { Room } from './entities/room.entity';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, Like, Repository } from 'typeorm';
 import { RoomCategory } from 'src/room_category/entities/room_category.entity';
 
 @Injectable()
 export class RoomService {
-  @InjectEntityManager()
-  private manager: EntityManager;
-
   @InjectRepository(Room)
   private roomRepository: Repository<Room>;
 
-  @InjectRepository(Room)
-  private categoryRepository: Repository<RoomCategory>;
   async create(createRoomDto) {
     const res = await this.roomRepository.save(createRoomDto);
     return res;
   }
 
-  async findAll() {
-    return this.roomRepository.find();
+  async find(params) {
+    const { pageSize, current, ...reset } = params;
+    const skip = (current - 1) * pageSize;
+    const where: any = {};
+    for (const key in reset) {
+      where[key] = Like(`%${reset[key]}%`);
+    }
+    const res = await this.roomRepository.find({
+      where,
+      skip,
+      take: pageSize,
+    });
+    return res;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} room`;
+  async findOne(id: number) {
+    const res = await this.roomRepository.findOneBy({ id });
+
+    return res;
   }
 
-  update(id: number, updateRoomDto: UpdateRoomDto) {
-    return `This action updates a #${id} room`;
+  async update(id: number, updateRoomDto: UpdateRoomDto) {
+    const res = await this.roomRepository.update(id, updateRoomDto);
+
+    return res;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} room`;
+  async remove(id: number) {
+    const res = await this.roomRepository.update(id, { state: false });
+    return res;
   }
 }
