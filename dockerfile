@@ -11,10 +11,16 @@ COPY package.json pnpm-lock.yaml ./
 RUN npm install -g pnpm
 
 # 安装 Nest.js 依赖项
-RUN pnpm install
+RUN npm install
 
 # 复制应用程序代码到工作目录
 COPY . .
+
+# 设置 Nginx 镜像
+FROM nginx:alpine
+
+# 复制 Nginx 配置文件
+COPY nginx.conf /etc/nginx/conf.d/admin_end.conf
 
 # 暴露 Nest.js 应用程序的默认端口（假设默认端口是 3000）
 EXPOSE 1101
