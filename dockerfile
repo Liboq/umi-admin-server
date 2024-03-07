@@ -1,29 +1,27 @@
-# 使用 Node.js 官方镜像作为基础
-FROM node:latest
-
-# 设置工作目录
-WORKDIR /app
-
-# 复制 package.json、pnpm-lock.yaml 或 pnpmfile.js 到工作目录
-COPY package.json pnpm-lock.yaml ./
+FROM node:16-alpine
+WORKDIR /nest-typeorm
+COPY package*.json /nest-typeorm/
 
 # 安装 pnpm
 RUN npm install -g pnpm
 
-# 安装 Nest.js 依赖项
-RUN npm install
+RUN pnpm install
 
-# 复制应用程序代码到工作目录
 COPY . .
+
+RUN pnpm run build
 
 # 设置 Nginx 镜像
 FROM nginx:alpine
-
 # 复制 Nginx 配置文件
 COPY nginx.conf /etc/nginx/conf.d/admin_end.conf
 
-# 暴露 Nest.js 应用程序的默认端口（假设默认端口是 3000）
+FROM node:16-alpine
+
+COPY --from=0 /nest-typeorm/dist ./dist
+
+COPY --from=0 /nest-typeorm/node_modules ./node_modules
+
 EXPOSE 1101
 
-# 启动 Nest.js 应用程序
-CMD ["pnpm", "run", "start"]
+CMD node dist/main.js

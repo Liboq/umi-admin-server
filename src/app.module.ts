@@ -29,7 +29,7 @@ import { Reservation } from './reservation/entities/reservation.entity';
     UserModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: '192.168.0.106',
+      host: 'host.docker.internal',
       port: 3306,
       username: 'root',
       password: '123456',
